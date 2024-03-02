@@ -310,6 +310,7 @@ impl GamepadId {
 /// to get a gamepad by id.
 pub struct Gamepads {
     gamepads: [Gamepad; MAX_GAMEPADS],
+    last_used_gamepad_id: Option<GamepadId>,
 
     // android winit backend:
     #[cfg(all(target_os = "android", feature = "android-winit"))]
@@ -352,6 +353,7 @@ impl Gamepads {
                 #[cfg(not(target_family = "wasm"))]
                 just_released_bits: 0,
             }),
+            last_used_gamepad_id: None,
 
             // android backend:
             #[cfg(all(target_os = "android", feature = "android-winit"))]
@@ -397,6 +399,14 @@ impl Gamepads {
     /// was called.
     pub fn all(&self) -> impl Iterator<Item = Gamepad> {
         self.gamepads.into_iter().filter(|p| p.connected)
+    }
+
+    pub fn get_last_used(&self) -> Option<Gamepad> {
+        if let Some(last_used_gamepad_id) = self.last_used_gamepad_id {
+            let pad = self.gamepads[last_used_gamepad_id.0 as usize];
+            return pad.connected.then_some(pad);
+        }
+        None
     }
 
     /// Provide haptic feedback by rumbling the gamepad (if supported).

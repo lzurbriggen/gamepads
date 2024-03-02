@@ -39,6 +39,7 @@ impl crate::Gamepads {
                 gilrs::EventType::Connected => {
                     if let Some(gamepad_idx) = self.find_or_insert(id) {
                         self.gamepads[gamepad_idx].connected = true;
+                        self.last_used_gamepad_id = Some(self.gamepads[gamepad_idx].id);
 
                         for (zone, axis) in [
                             (0, gilrs::Axis::LeftStickX),
@@ -63,6 +64,7 @@ impl crate::Gamepads {
                 }
                 gilrs::EventType::ButtonPressed(button, _code) => {
                     if let Some(gamepad_idx) = self.find_or_insert(id) {
+                        self.last_used_gamepad_id = Some(self.gamepads[gamepad_idx].id);
                         if let Some(b) = crate::Button::from_gilrs(button) {
                             let bit = 1 << (b as u32);
                             self.gamepads[gamepad_idx].pressed_bits |= bit;
@@ -72,6 +74,7 @@ impl crate::Gamepads {
                 }
                 gilrs::EventType::ButtonReleased(button, _code) => {
                     if let Some(gamepad_idx) = self.find_or_insert(id) {
+                        self.last_used_gamepad_id = Some(self.gamepads[gamepad_idx].id);
                         if let Some(b) = crate::Button::from_gilrs(button) {
                             let bit = 1 << (b as u32);
                             self.gamepads[gamepad_idx].pressed_bits &= !bit;
@@ -81,6 +84,7 @@ impl crate::Gamepads {
                 }
                 gilrs::EventType::AxisChanged(axis, value, _code) => {
                     if let Some(gamepad_idx) = self.find_or_insert(id) {
+                        self.last_used_gamepad_id = Some(self.gamepads[gamepad_idx].id);
                         if let Some(axis_idx) = match axis {
                             gilrs::Axis::LeftStickX => Some(0),
                             gilrs::Axis::LeftStickY => Some(1),
