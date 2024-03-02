@@ -31,6 +31,7 @@ impl crate::Gamepads {
     pub fn poll_gilrs(&mut self) {
         for gamepad in self.gamepads.iter_mut() {
             gamepad.just_pressed_bits = 0;
+            gamepad.just_released_bits = 0;
         }
 
         while let Some(gilrs::Event { id, event, .. }) = self.gilrs_instance.next_event() {
@@ -74,6 +75,7 @@ impl crate::Gamepads {
                         if let Some(b) = crate::Button::from_gilrs(button) {
                             let bit = 1 << (b as u32);
                             self.gamepads[gamepad_idx].pressed_bits &= !bit;
+                            self.gamepads[gamepad_idx].just_released_bits = bit;
                         }
                     }
                 }

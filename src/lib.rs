@@ -163,8 +163,12 @@ pub struct Gamepad {
     axes: [f32; 4],
     #[cfg(target_family = "wasm")]
     last_pressed_bits: u32,
+    #[cfg(target_family = "wasm")]
+    last_pressed_bits: u32,
     #[cfg(not(target_family = "wasm"))]
     just_pressed_bits: u32,
+    #[cfg(not(target_family = "wasm"))]
+    just_released_bits: u32,
 }
 
 // Assert size of struct Gamepad, which is used by javascript.
@@ -240,6 +244,11 @@ impl Gamepad {
         Button::all().filter(|&t| self.is_just_pressed(t))
     }
 
+    /// An iterator over all just released buttons.
+    pub fn all_just_released(&self) -> impl Iterator<Item = Button> + '_ {
+        Button::all().filter(|&t| self.is_just_released(t))
+    }
+
     /// Check if a button has just been pressed.
     pub const fn is_just_pressed(&self, button: Button) -> bool {
         let queried_bit = 1 << (button as u32);
@@ -250,6 +259,19 @@ impl Gamepad {
         #[cfg(not(target_family = "wasm"))]
         {
             (self.just_pressed_bits & queried_bit) != 0
+        }
+    }
+
+    /// Check if a button has just been pressed.
+    pub const fn is_just_released(&self, button: Button) -> bool {
+        let queried_bit = 1 << (button as u32);
+        #[cfg(target_family = "wasm")]
+        {
+            (self.pressed_bits & queried_bit) == 0 && (self.last_pressed_bits & queried_bit) == 1
+        }
+        #[cfg(not(target_family = "wasm"))]
+        {
+            (self.just_released_bits & queried_bit) != 0
         }
     }
 
@@ -327,6 +349,8 @@ impl Gamepads {
                 last_pressed_bits: 0,
                 #[cfg(not(target_family = "wasm"))]
                 just_pressed_bits: 0,
+                #[cfg(not(target_family = "wasm"))]
+                just_released_bits: 0,
             }),
 
             // android backend:

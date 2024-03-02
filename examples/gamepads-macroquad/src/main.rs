@@ -1,3 +1,5 @@
+use macroquad::color::WHITE;
+
 struct Player {
     position: (f32, f32),
     gamepad_id: gamepads::GamepadId,
@@ -46,6 +48,10 @@ async fn main() {
             for button_type in gamepad.all_just_pressed() {
                 player.color =
                     macroquad::color::Color::from_hex(DISTINCT_COLORS[button_type as usize]);
+            }
+
+            for _ in gamepad.all_just_released() {
+                player.color = WHITE;
             }
 
             if gamepad.is_just_pressed(gamepads::Button::Mode) {
