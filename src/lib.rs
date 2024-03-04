@@ -163,8 +163,6 @@ pub struct Gamepad {
     axes: [f32; 4],
     #[cfg(target_family = "wasm")]
     last_pressed_bits: u32,
-    #[cfg(target_family = "wasm")]
-    last_pressed_bits: u32,
     #[cfg(not(target_family = "wasm"))]
     just_pressed_bits: u32,
     #[cfg(not(target_family = "wasm"))]
